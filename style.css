@@ -1,0 +1,45 @@
+:root {
+  --bg: #F4F0E6;
+  --surface: #FFFDF8;
+  --text: #1B2520;
+  --muted: #5E665F;
+  --line: #E3DCCB;
+  --basil: #2C6A4C;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E1210;
+    --surface: #171C19;
+    --text: #EEEAE0;
+    --muted: #8D968F;
+    --line: #29312C;
+    --basil: #5DB487;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+main { max-width: 640px; margin: 0 auto; padding: 56px 20px 72px; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; margin-bottom: 40px; }
+.brand img { width: 44px; height: 44px; border-radius: 10px; }
+.brand span { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 22px; }
+.eyebrow { font-family: "Fraunces", Georgia, serif; font-style: italic; font-weight: 500; color: var(--muted); margin: 0 0 4px; }
+h1 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 40px; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 20px; }
+h2 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 22px; margin: 36px 0 8px; }
+p, li { color: var(--text); }
+.lede { font-size: 19px; color: var(--muted); }
+.muted { color: var(--muted); }
+a { color: var(--basil); text-underline-offset: 3px; }
+ul { padding-left: 20px; }
+li { margin: 6px 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px 22px; margin: 24px 0; }
+.card p { margin: 0; }
+.links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 28px; }
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); display: flex; gap: 18px; flex-wrap: wrap; }
+footer a { color: var(--muted); }
