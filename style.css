@@ -1,45 +1,85 @@
+/* Tokens mirror the app's Theme.swift (Ink), light and dark. */
 :root {
   --bg: #F4F0E6;
   --surface: #FFFDF8;
+  --raised: #ECE6D8;
   --text: #1B2520;
   --muted: #5E665F;
   --line: #E3DCCB;
   --basil: #2C6A4C;
-  color-scheme: light dark;
+  --basil-deep: #1E4A36;
+  --fill: #2C6A4C;
+  --cream: #FBF6EA;
+  --tomato: #C9543A;
+  --butter: #C98F17;
+  --butter-text: #94670A;
+  --paper: #FFFDF6;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0E1210;
     --surface: #171C19;
+    --raised: #212824;
     --text: #EEEAE0;
     --muted: #8D968F;
     --line: #29312C;
     --basil: #5DB487;
+    --basil-deep: #1C3A2C;
+    --fill: #2F7A55;
+    --cream: #F1EBDD;
+    --tomato: #E7785C;
+    --butter: #E6B449;
+    --butter-text: #E6B449;
+    --paper: #1B211E;
+    color-scheme: dark;
   }
 }
+
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font: 17px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
 }
-main { max-width: 640px; margin: 0 auto; padding: 56px 20px 72px; }
-.brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; margin-bottom: 40px; }
-.brand img { width: 44px; height: 44px; border-radius: 10px; }
-.brand span { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 22px; }
-.eyebrow { font-family: "Fraunces", Georgia, serif; font-style: italic; font-weight: 500; color: var(--muted); margin: 0 0 4px; }
-h1 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 40px; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 20px; }
-h2 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 22px; margin: 36px 0 8px; }
-p, li { color: var(--text); }
-.lede { font-size: 19px; color: var(--muted); }
-.muted { color: var(--muted); }
+img { max-width: 100%; display: block; }
 a { color: var(--basil); text-underline-offset: 3px; }
-ul { padding-left: 20px; }
-li { margin: 6px 0; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px 22px; margin: 24px 0; }
-.card p { margin: 0; }
-.links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 28px; }
-footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); display: flex; gap: 18px; flex-wrap: wrap; }
-footer a { color: var(--muted); }
+:focus-visible { outline: 2.5px solid var(--basil); outline-offset: 3px; border-radius: 10px; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; }
+.brand { display: inline-flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
+.brand img { width: 40px; height: 40px; border-radius: 10px; }
+.brand span { font-family: var(--serif); font-weight: 600; font-size: 23px; letter-spacing: -0.01em; }
+.top nav { display: flex; gap: 22px; font-size: 15px; }
+.top nav a { color: var(--muted); text-decoration: none; }
+.top nav a:hover { color: var(--text); }
+
+.eyebrow { font-family: var(--serif); font-style: italic; font-weight: 500; color: var(--basil); margin: 0 0 6px; font-size: 17px; }
+
+/* Long form pages (privacy, support) */
+.doc { max-width: 660px; margin: 0 auto; padding: 24px 24px 80px; }
+.doc h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(36px, 6vw, 48px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 24px; }
+.doc h2 { font-family: var(--serif); font-weight: 600; font-size: 23px; margin: 40px 0 8px; }
+.doc li { margin: 6px 0; }
+.doc .card { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 20px 22px; margin: 24px 0; }
+.doc .card p { margin: 0; }
+.doc .qa { border-top: 1px solid var(--line); padding: 18px 0 4px; }
+.doc .qa h3 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0 0 4px; }
+.doc .qa p { margin: 0 0 14px; color: var(--muted); }
+
+footer.foot { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size: 14px; color: var(--muted); display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+footer.foot a { color: var(--muted); }
+footer.foot .spacer { flex: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

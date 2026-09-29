@@ -4,31 +4,379 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Larder</title>
-<meta name="description" content="Larder is a calm grocery list and pantry app for iPhone. Know what is at home, never forget what to buy.">
+<meta name="description" content="Larder is a grocery list and pantry app for iPhone. Tap as you use things up, and your shopping list writes itself.">
+<meta property="og:title" content="Larder: grocery list and pantry for iPhone">
+<meta property="og:description" content="Use it up. The list writes itself.">
+<meta property="og:image" content="https://joymadhu49.github.io/larder-app/img/1-today.jpg">
+<meta name="theme-color" content="#F4F0E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1210" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  /* Hero */
+  .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: end; padding: 48px 0 40px; }
+  .hero h1 {
+    font-family: var(--serif); font-weight: 600; margin: 0;
+    font-size: clamp(48px, 8.4vw, 104px); line-height: .94; letter-spacing: -0.035em;
+    font-variation-settings: "opsz" 144;
+  }
+  .hero h1 em { font-style: italic; font-weight: 500; color: var(--basil); }
+  .hero .side p { margin: 0 0 20px; font-size: 19px; color: var(--muted); max-width: 30ch; }
+  .soon {
+    display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px 11px 14px;
+    border-radius: 999px; background: var(--fill); color: var(--cream); font-weight: 600; font-size: 15px;
+  }
+  .soon svg { width: 18px; height: 18px; }
+
+  /* The counter: shelf of jars beside a paper list */
+  .counter {
+    display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 32px; padding: 28px;
+  }
+  .try { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 0 4px 18px; }
+  .try p { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 19px; }
+  .try small { color: var(--muted); font-size: 14px; }
+  .shelf { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; position: relative; padding-bottom: 14px; }
+  .shelf::after {
+    content: ""; position: absolute; left: -6px; right: -6px; bottom: 0; height: 10px;
+    border-radius: 6px; background: var(--raised); border-top: 1px solid var(--line);
+  }
+  .jar {
+    appearance: none; border: 0; background: none; color: var(--text); font: inherit; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 4px 10px; border-radius: 18px;
+    transition: background .2s var(--ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jar:hover { background: var(--bg); }
+  .jar svg { width: 100%; max-width: 76px; height: auto; overflow: visible; transition: transform .35s var(--ease); }
+  .jar:active svg { transform: scale(.94); }
+  .jar .lid { transition: fill .3s; }
+  .jar .body { fill: none; stroke-width: 3; transition: stroke .3s; }
+  .jar .level { transform-box: fill-box; transform-origin: 50% 100%; transition: transform .55s var(--ease), fill .3s; }
+  .jar .glint { stroke: #fff; stroke-width: 3; stroke-linecap: round; opacity: .4; }
+  .jar .name { font-family: var(--serif); font-weight: 600; font-size: 17px; line-height: 1.1; }
+  .jar .state { font-size: 13px; font-weight: 600; margin-top: -4px; transition: color .3s; }
+  .jar[data-level="0"] .state { color: var(--muted); }
+  .jar[data-level="1"] .state { color: var(--tomato); }
+  .jar[data-level="2"] .state { color: var(--butter-text); }
+  .jar[data-level="3"] .state { color: var(--muted); }
+  .jar.bump svg { animation: bump .4s var(--ease); }
+  @keyframes bump { 30% { transform: translateX(-3px) rotate(-3deg); } 60% { transform: translateX(3px) rotate(3deg); } }
+
+  .paper {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 6px 6px 18px 18px;
+    padding: 20px 20px 18px; transform: rotate(1.2deg); position: relative;
+    box-shadow: 0 1px 0 var(--line), 0 18px 30px -24px rgba(27, 37, 32, .35);
+    background-image: repeating-linear-gradient(to bottom, transparent 0 43px, var(--line) 43px 44px);
+    background-position: 0 70px; background-repeat: no-repeat; background-size: 100% calc(100% - 140px);
+  }
+  .paper::before {
+    content: ""; position: absolute; top: -9px; left: 50%; width: 76px; height: 18px; transform: translateX(-50%) rotate(-2deg);
+    background: color-mix(in srgb, var(--butter) 30%, transparent); border-radius: 2px;
+  }
+  .paper .eyebrow { font-size: 15px; margin-bottom: 0; }
+  .paper h2 { font-family: var(--serif); font-weight: 600; font-size: 26px; margin: 0 0 8px; letter-spacing: -0.01em; display: flex; justify-content: space-between; align-items: baseline; }
+  .paper h2 span { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  .items { list-style: none; margin: 0; padding: 0; min-height: 132px; }
+  .items li { animation: arrive .5s var(--ease) both; }
+  .items li.leaving { animation: leave .35s var(--ease) both; }
+  @keyframes arrive { from { opacity: 0; transform: translateX(-28px) rotate(-2deg); } }
+  @keyframes leave { to { opacity: 0; transform: translateX(24px); } }
+  .item {
+    appearance: none; border: 0; background: none; font: inherit; color: var(--text); cursor: pointer; width: 100%;
+    display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 2px; text-align: left;
+  }
+  .item .ring {
+    flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line);
+    display: grid; place-items: center; transition: background .25s, border-color .25s;
+  }
+  .item .ring svg { width: 13px; height: 13px; opacity: 0; transform: scale(.4); transition: opacity .2s, transform .3s var(--ease); }
+  .item[aria-pressed="true"] .ring { background: var(--fill); border-color: var(--fill); }
+  .item[aria-pressed="true"] .ring svg { opacity: 1; transform: none; }
+  .item .label { font-weight: 500; transition: color .25s; }
+  .item[aria-pressed="true"] .label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted); }
+  .item .why { margin-left: auto; font-size: 13px; color: var(--tomato); font-weight: 600; }
+  .item .why.out { color: var(--muted); }
+  .empty { margin: 14px 0 0; color: var(--muted); font-size: 15px; }
+  .finish {
+    appearance: none; border: 0; font: inherit; cursor: pointer; width: 100%; margin-top: 14px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left;
+    padding: 12px 18px; border-radius: 16px; background: var(--fill); color: var(--cream);
+    transition: opacity .25s, transform .2s var(--ease);
+  }
+  .finish:disabled { opacity: .38; cursor: default; }
+  .finish:not(:disabled):active { transform: scale(.98); }
+  .finish b { font-weight: 600; }
+  .finish small { font-size: 13px; opacity: .85; min-height: 1.3em; }
+
+  /* Screens */
+  section.block { padding: 96px 0 0; }
+  .block-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 36px; }
+  .block-head h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(34px, 4.6vw, 54px); line-height: 1; letter-spacing: -0.025em; margin: 0; max-width: 16ch; }
+  .block-head p { margin: 0; color: var(--muted); max-width: 34ch; }
+  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .screens figure { margin: 0; }
+  .phone {
+    border-radius: 44px; padding: 9px; background: #161D19; outline: 1px solid var(--line);
+    box-shadow: 0 30px 50px -36px rgba(27, 37, 32, .55);
+  }
+  .phone img { border-radius: 36px; width: 100%; height: auto; aspect-ratio: 1320 / 2868; background: var(--raised); }
+  .screens figure:nth-child(2) { transform: translateY(40px); }
+  .screens figcaption { margin-top: 18px; padding: 0 6px; }
+  .screens figcaption b { font-family: var(--serif); font-weight: 600; font-size: 21px; display: block; }
+  .screens figcaption span { color: var(--muted); font-size: 15px; }
+
+  /* Details */
+  .details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 40px; margin: 0; }
+  .details div { border-top: 1px solid var(--line); padding: 20px 0 28px; }
+  .details dt { font-family: var(--serif); font-weight: 600; font-size: 21px; margin-bottom: 4px; }
+  .details dd { margin: 0; color: var(--muted); }
+
+  /* Promise */
+  .promise { margin: 96px 0 72px; padding: 64px 48px; border-radius: 36px; background: var(--basil-deep); color: var(--cream); display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: end; }
+  .promise h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(36px, 5vw, 64px); line-height: .98; letter-spacing: -0.03em; margin: 0; }
+  .promise h2 em { font-weight: 500; opacity: .75; }
+  .promise p { margin: 0 0 14px; opacity: .85; }
+  .promise a { color: var(--cream); }
+
+  @media (max-width: 920px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+    .counter { grid-template-columns: 1fr; padding: 20px; border-radius: 28px; }
+    .paper { transform: rotate(.6deg); }
+    .screens { grid-template-columns: repeat(3, minmax(220px, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
+    .screens figure { scroll-snap-align: center; }
+    .screens figure:nth-child(2) { transform: none; }
+    .details { grid-template-columns: 1fr 1fr; }
+    .promise { grid-template-columns: 1fr; padding: 44px 28px; }
+    .block-head { flex-direction: column; align-items: start; }
+  }
+  @media (max-width: 560px) {
+    .shelf { grid-template-columns: repeat(3, 1fr); row-gap: 0; }
+    .shelf::after { display: none; }
+    .shelf .jar { border-bottom: 10px solid var(--raised); border-radius: 18px 18px 4px 4px; }
+    .try { flex-direction: column; gap: 2px; }
+    .details { grid-template-columns: 1fr; }
+    .top nav { gap: 16px; }
+  }
+</style>
 </head>
 <body>
-<main>
-  <a class="brand" href="./"><img src="icon.png" alt=""><span>Larder</span></a>
-  <p class="eyebrow">Grocery list and pantry</p>
-  <h1>Know what is at home. Never forget what to buy.</h1>
-  <p class="lede">A calm home for your groceries on iPhone.</p>
-  <ul>
-    <li><strong>Plan the shop.</strong> One list, sorted the way you walk the store.</li>
-    <li><strong>Know what is at home.</strong> Tap as you use things up, and low items join the list.</li>
-    <li><strong>Restock in one tap.</strong> Finish shopping and your pantry fills itself.</li>
-    <li><strong>Scan a receipt.</strong> Prices fill in by themselves, read on your phone.</li>
-  </ul>
-  <div class="card"><p>No account. No ads. No tracking. Everything stays on your phone.</p></div>
-  <footer>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="icon.png" alt=""><span>Larder</span></a>
+    <nav aria-label="Site">
+      <a href="support/">Support</a>
+      <a href="privacy/">Privacy</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Grocery list and pantry for iPhone</p>
+        <h1>Use it up.<br><em>The list writes itself.</em></h1>
+      </div>
+      <div class="side">
+        <p>Larder keeps a simple picture of your fridge and cupboards. When something runs low, it lands on your shopping list.</p>
+        <span class="soon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+          Coming soon to the App Store
+        </span>
+      </div>
+    </section>
+
+    <section class="counter" aria-labelledby="try-title">
+      <div>
+        <div class="try">
+          <p id="try-title">Try it: tap a jar to use some.</p>
+          <small>Low or out, and it goes on the list.</small>
+        </div>
+        <div class="shelf" id="shelf"></div>
+      </div>
+      <div class="paper">
+        <p class="eyebrow">Next shop</p>
+        <h2>Shopping list <span id="count"></span></h2>
+        <ul class="items" id="items"></ul>
+        <p class="empty" id="empty" hidden>Nothing to buy. Use something up on the shelf.</p>
+        <button class="finish" id="finish" disabled>
+          <b>Finish shopping</b><small id="finish-note">Tick what is in the cart</small>
+        </button>
+      </div>
+      <p class="sr-only" id="live" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></p>
+    </section>
+
+    <section class="block" aria-labelledby="screens-title">
+      <div class="block-head">
+        <h2 id="screens-title">Three tabs. That is the whole app.</h2>
+        <p>No folders, no setup. Pick what is already at home on the first day and you are done.</p>
+      </div>
+      <div class="screens">
+        <figure>
+          <div class="phone"><img src="img/1-today.jpg" alt="Today tab: eight items to buy, about twenty dollars, and how stocked each area of the house is." loading="lazy" width="506" height="1100"></div>
+          <figcaption><b>Today</b><span>What to buy, and which shelves are running low.</span></figcaption>
+        </figure>
+        <figure>
+          <div class="phone"><img src="img/2-list.jpg" alt="List tab: items grouped by aisle with prices and a Finish shopping button." loading="lazy" width="506" height="1100"></div>
+          <figcaption><b>List</b><span>Grouped by aisle, in the order you walk the store.</span></figcaption>
+        </figure>
+        <figure>
+          <div class="phone"><img src="img/3-pantry.jpg" alt="Pantry tab: running low items and areas of the house with item counts." loading="lazy" width="506" height="1100"></div>
+          <figcaption><b>Pantry</b><span>Fridge, freezer, cupboard, cleaning and bathroom.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="details-title">
+      <div class="block-head">
+        <h2 id="details-title">Small things, done properly.</h2>
+      </div>
+      <dl class="details">
+        <div><dt>Scan a receipt</dt><dd>Prices fill in from a photo of the receipt, read on your phone.</dd></div>
+        <div><dt>Any currency</dt><dd>Taka, dollars, euros or rupees, written the way your country writes them.</dd></div>
+        <div><dt>Metric or US units</dt><dd>Kilograms and litres, or pounds and gallons.</dd></div>
+        <div><dt>Import a list</dt><dd>Paste one from Notes or a chat and it sorts itself by aisle.</dd></div>
+        <div><dt>Share the list</dt><dd>Send it as plain text to whoever is going to the store.</dd></div>
+        <div><dt>Move to a new phone</dt><dd>One backup file carries your pantry, prices and trips across.</dd></div>
+      </dl>
+    </section>
+
+    <section class="promise">
+      <h2>No account.<br>No ads.<br><em>No tracking.</em></h2>
+      <div>
+        <p>Your pantry lives on your phone and nowhere else. Larder does not connect to any server.</p>
+        <a href="privacy/">Read the privacy policy</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Larder for iPhone</span>
+    <span class="spacer"></span>
     <a href="support/">Support</a>
     <a href="privacy/">Privacy policy</a>
   </footer>
-</main>
+</div>
+
+<script>
+  // Same rules as the app: a tap uses one step and stops at Out; Low or Out goes on the list;
+  // Finish shopping restocks what was ticked and takes it off the list.
+  const LEVELS = [
+    { word: "Out", h: 0, tint: "var(--muted)" },
+    { word: "Low", h: .24, tint: "var(--tomato)" },
+    { word: "Half", h: .55, tint: "var(--butter)" },
+    { word: "Full", h: .9, tint: "var(--basil)" }
+  ];
+  const jars = [
+    { name: "Milk", level: 2 }, { name: "Coffee", level: 1 }, { name: "Eggs", level: 3 },
+    { name: "Rice", level: 3 }, { name: "Honey", level: 2 }, { name: "Tea", level: 3 }
+  ];
+  const list = [{ name: "Coffee", ticked: false }];
+
+  const shelf = document.getElementById("shelf");
+  const items = document.getElementById("items");
+  const live = document.getElementById("live");
+  const finish = document.getElementById("finish");
+  const say = t => { live.textContent = ""; setTimeout(() => live.textContent = t, 60); };
+
+  function jarSVG(i) {
+    return `<svg viewBox="0 0 64 84" aria-hidden="true">
+      <defs><clipPath id="c${i}"><rect x="9.5" y="17.5" width="45" height="63" rx="12.5"/></clipPath></defs>
+      <rect class="lid" x="15" y="4" width="34" height="9" rx="3.5"/>
+      <g clip-path="url(#c${i})"><rect class="level" x="9.5" y="17.5" width="45" height="63"/></g>
+      <rect class="body" x="8" y="16" width="48" height="66" rx="14"/>
+      <path class="glint" d="M17 30v14"/>
+    </svg>`;
+  }
+
+  function paintJar(el, j) {
+    const l = LEVELS[j.level];
+    el.dataset.level = j.level;
+    el.querySelector(".level").style.transform = `scaleY(${l.h})`;
+    el.querySelector(".level").style.fill = `color-mix(in srgb, ${l.tint} 85%, transparent)`;
+    el.querySelector(".lid").style.fill = l.tint;
+    el.querySelector(".body").style.stroke = l.tint;
+    el.querySelector(".state").textContent = l.word;
+    el.setAttribute("aria-label", `${j.name}, ${l.word === "Low" ? "running low" : l.word.toLowerCase()}.${j.level ? " Tap to use some." : ""}`);
+  }
+
+  jars.forEach((j, i) => {
+    const b = document.createElement("button");
+    b.className = "jar";
+    b.innerHTML = jarSVG(i) + `<span class="name">${j.name}</span><span class="state"></span>`;
+    paintJar(b, j);
+    b.addEventListener("click", () => {
+      if (j.level === 0) {
+        b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+        say(`${j.name} is out. Finish shopping to restock it.`);
+        return;
+      }
+      j.level -= 1;
+      paintJar(b, j);
+      if (j.level <= 1 && !list.some(x => x.name === j.name)) {
+        list.push({ name: j.name, ticked: false });
+        renderList();
+        say(`${j.name} is ${j.level ? "running low" : "out"}. Added to your list.`);
+      } else {
+        renderList(false);
+        say(`${j.name}: ${LEVELS[j.level].word.toLowerCase()}.`);
+      }
+    });
+    j.el = b;
+    shelf.appendChild(b);
+  });
+
+  function renderList(animateNew = true) {
+    const existing = new Set([...items.children].map(li => li.dataset.name));
+    items.innerHTML = "";
+    list.forEach(entry => {
+      const j = jars.find(x => x.name === entry.name);
+      const li = document.createElement("li");
+      li.dataset.name = entry.name;
+      if (!animateNew || existing.has(entry.name)) li.style.animation = "none";
+      li.innerHTML = `<button class="item" aria-pressed="${entry.ticked}">
+        <span class="ring"><svg viewBox="0 0 16 16" fill="none" stroke="var(--cream)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
+        <span class="label">${entry.name}</span>
+        <span class="why ${j.level ? "" : "out"}">${j.level ? "Low" : "Out"}</span>
+      </button>`;
+      li.firstElementChild.addEventListener("click", () => {
+        entry.ticked = !entry.ticked;
+        renderList(false);
+        items.querySelector(`[data-name="${entry.name}"] .item`).focus();
+      });
+      items.appendChild(li);
+    });
+    const open = list.filter(x => !x.ticked).length;
+    const ticked = list.length - open;
+    document.getElementById("count").textContent = list.length ? `${open} to buy` : "";
+    document.getElementById("empty").hidden = list.length > 0;
+    finish.disabled = ticked === 0;
+    document.getElementById("finish-note").textContent =
+      ticked ? `Restocks ${ticked} in your pantry` : list.length ? "Tick what is in the cart" : "";
+  }
+
+  finish.addEventListener("click", () => {
+    const bought = list.filter(x => x.ticked);
+    bought.forEach(entry => {
+      const li = items.querySelector(`[data-name="${entry.name}"]`);
+      if (li) li.classList.add("leaving");
+    });
+    setTimeout(() => {
+      bought.forEach(entry => {
+        const j = jars.find(x => x.name === entry.name);
+        j.level = 3;
+        paintJar(j.el, j);
+        list.splice(list.indexOf(entry), 1);
+      });
+      renderList(false);
+      say(`Restocked ${bought.length} ${bought.length === 1 ? "item" : "items"}. Your pantry is full again.`);
+    }, 320);
+  });
+
+  renderList(false);
+</script>
 </body>
 </html>
